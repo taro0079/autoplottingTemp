@@ -4,6 +4,7 @@ import serial
 import datetime
 import os
 import time
+import numpy as np
 ## 温度を計測してリアルタイムプロット
 
 def main():
@@ -11,9 +12,10 @@ def main():
     serial.baudrate = 9600
 
     # ardiunoのポートを特定する（多分Mac専用）
-    for file in os.listdir('/dev/'):
-        if "tty.usbmodem" in file:
-            serial.port = '/dev/' + file
+    #for file in os.listdir('/dev/'):
+    #    if "tty.usbmodem" in file:
+    #        serial.port = '/dev/' + file
+    serial.port = "COM3"
 
     # データの初期化
     time_data = [] # 時間用に適当な大きさ配列を確保
@@ -39,12 +41,17 @@ def main():
                 time_data.append(Time)
                 temp_data.append(temp)
 
+                
+
                 li.set_data(time_data, temp_data)
                 plt.xlim(min(time_data), max(time_data))
                 plt.ylim(min(temp_data), max(temp_data))
 
                 fig.canvas.mpl_connect('close_event', handle_close)
-                plt.pause(.5)
+                plt.pause(0.1)
+            
+            data = np.vstack([time_data, temp_data]).T
+            np.savetxt("data.csv", data, delimiter=",")
 
 def handle_close(evt):
     print("close!")
